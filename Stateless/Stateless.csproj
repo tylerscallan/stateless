@@ -67,6 +67,7 @@
     <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DynamicPairTriggerBehaviour.cs" />
     <Compile Include="DynamicTriggerBehaviour.cs">
       <SubType>Code</SubType>
     </Compile>

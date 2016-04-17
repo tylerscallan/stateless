@@ -448,6 +448,42 @@ namespace Stateless
                     guardDescription != null ? guardDescription : guard?.Method.Name);
             }
 
+
+
+            // MY ADDITION HERE 
+
+            /// <summary>
+            /// Accept the specified trigger and transition to the destination state, calculated
+            /// dynamically by the supplied function.
+            /// </summary>
+            /// <param name="trigger">The accepted trigger.</param>
+            /// <param name="destinationStateSelector">Function to calculate the state 
+            /// that the trigger will cause a transition to.</param>
+            /// <param name="guardConditional">Function that must return true in order for the
+            /// trigger to be accepted.</param>
+            /// <param name="guardDescription">Guard description</param>
+            /// <returns>The reciever.</returns>
+            /// <typeparam name="TArg0">Type of the first trigger argument.</typeparam>
+            public StateConfiguration PermitDynamicPairIf<TArg0>(TriggerWithParameters<TArg0> trigger, Func<TArg0, TState> destinationStateSelector, Func<TArg0, bool> guardConditional, string guardDescription = null)
+            {
+                Enforce.ArgumentNotNull(trigger, nameof(trigger));
+                Enforce.ArgumentNotNull(destinationStateSelector, nameof(destinationStateSelector));
+                Enforce.ArgumentNotNull(guardConditional, nameof(guardConditional));
+                return InternalPermitDynamicPairIf(
+                    trigger.Trigger,
+                    args => destinationStateSelector(
+                        ParameterConversion.Unpack<TArg0>(args, 0)),
+                    args => guardConditional(
+                        ParameterConversion.Unpack<TArg0>(args, 0)),
+                    guardDescription != null ? guardDescription : guardConditional?.Method.Name);
+            }
+
+
+            
+            
+            
+            
+            
             /// <summary>
             /// Accept the specified trigger and transition to the destination state, calculated
             /// dynamically by the supplied function.
@@ -558,6 +594,15 @@ namespace Stateless
                 _representation.AddTriggerBehaviour(new DynamicTriggerBehaviour(trigger, destinationStateSelector, guard, guardDescription));
                 return this;
             }
+
+            StateConfiguration InternalPermitDynamicPairIf(TTrigger trigger, Func<object[], TState> destinationStateSelector, Func<object[], bool> guardConditional, string guardDescription)
+            {
+                Enforce.ArgumentNotNull(destinationStateSelector, nameof(destinationStateSelector));
+                Enforce.ArgumentNotNull(guardConditional, nameof(guardConditional));
+                _representation.AddTriggerBehaviour(new DynamicPairTriggerBehaviour(trigger, destinationStateSelector, guardConditional, guardDescription));
+                return this;
+            }
+
         }
     }
 }
